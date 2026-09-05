@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>교회 공지 알림</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --surface:#FFFFFF;
+    --surface-alt:#F1E7CE;
+    --text:#241C12;
+    --text-muted:#8A7A5C;
+    --accent:#C8842A;
+    --accent-ink:#2B1B04;
+    --accent-soft:#F6E6C8;
+    --indigo:#3B4A7A;
+    --indigo-soft:#E3E7F4;
+    --ok:#2E7D4F;
+    --ok-soft:#DFF3E6;
+    --error:#B3432B;
+    --error-soft:#F6DED6;
+    --font-ui:'Work Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-display:'Fraunces', Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --surface:#241E17;
+      --surface-alt:#2E2619;
+      --text:#F2E8D8;
+      --text-muted:#B3A489;
+      --accent:#E0A34A;
+      --accent-ink:#1C1204;
+      --accent-soft:#3A2C14;
+      --indigo:#8C9BD6;
+      --indigo-soft:#232B47;
+      --ok:#6FCF97;
+      --ok-soft:#1E3327;
+      --error:#E0836A;
+      --error-soft:#3A2019;
+    }
+  }
+  :root[data-theme="dark"]{
+    --surface:#241E17;
+    --surface-alt:#2E2619;
+    --text:#F2E8D8;
+    --text-muted:#B3A489;
+    --accent:#E0A34A;
+    --accent-ink:#1C1204;
+    --accent-soft:#3A2C14;
+    --indigo:#8C9BD6;
+    --indigo-soft:#232B47;
+    --ok:#6FCF97;
+    --ok-soft:#1E3327;
+    --error:#E0836A;
+    --error-soft:#3A2019;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--surface);
+    color:var(--text);
+    font-family:var(--font-ui);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1.5rem;
+  }
+  .card{
+    width:100%;
+    max-width:26rem;
+    text-align:center;
+  }
+  .logo{
+    width:5.5rem;
+    height:5.5rem;
+    border-radius:1.25rem;
+    background:var(--accent-soft);
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 1.25rem;
+    font-size:2.25rem;
+    overflow:hidden;
+  }
+  .logo img{ width:100%; height:100%; object-fit:cover; }
+  h1{
+    font-family:var(--font-display);
+    font-size:1.5rem;
+    font-weight:600;
+    margin:0 0 .5rem;
+  }
+  .church-name{ color:var(--accent); }
+  p.lead{
+    color:var(--text-muted);
+    line-height:1.6;
+    margin:0 0 1.75rem;
+    font-size:.95rem;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.5rem;
+    width:100%;
+    padding:.95rem 1.5rem;
+    border-radius:.9rem;
+    border:none;
+    font-family:var(--font-ui);
+    font-weight:600;
+    font-size:1rem;
+    cursor:pointer;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  .btn:active{ transform:scale(.98); }
+  .btn-primary{ background:var(--accent); color:var(--accent-ink); }
+  .btn-primary:disabled{ opacity:.6; cursor:default; }
+  .status{
+    margin-top:1.25rem;
+    padding:.9rem 1.1rem;
+    border-radius:.75rem;
+    font-size:.9rem;
+    line-height:1.55;
+    text-align:left;
+    display:none;
+  }
+  .status.show{ display:block; }
+  .status-ok{ background:var(--ok-soft); color:var(--ok); }
+  .status-error{ background:var(--error-soft); color:var(--error); }
+  .status-info{ background:var(--indigo-soft); color:var(--indigo); }
+  .steps{
+    text-align:left;
+    background:var(--surface-alt);
+    border-radius:.9rem;
+    padding:1.1rem 1.25rem;
+    margin-top:1.25rem;
+    font-size:.9rem;
+    line-height:1.7;
+    display:none;
+  }
+  .steps.show{ display:block; }
+  .steps ol{ margin:.4rem 0 0; padding-left:1.2rem; }
+  .steps b{ color:var(--accent); }
+  .footer-note{
+    margin-top:1.75rem;
+    font-size:.78rem;
+    color:var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo" id="logo">🔔</div>
+  <h1>알림 받기<br><span class="church-name" id="churchName">우리 교회</span></h1>
+  <p class="lead" id="leadText">주보와 공지사항을 앱 설치 없이, 데이터 요금 걱정 없이 바로 휴대폰 알림으로 받아보세요.</p>
+
+  <button class="btn btn-primary" id="subscribeBtn">알림 받기</button>
+
+  <div class="status" id="status"></div>
+  <div class="steps" id="iosSteps">
+    <b>아이폰에서는 먼저 홈 화면에 추가해야 알림을 받을 수 있어요:</b>
+    <ol>
+      <li>아래쪽 <b>공유 버튼</b>(⬆️ 네모 아이콘)을 누르세요</li>
+      <li><b>"홈 화면에 추가"</b>를 선택하세요</li>
+      <li>홈 화면에 생긴 아이콘을 눌러 <b>다시 열어주세요</b></li>
+      <li>그 다음 "알림 받기" 버튼을 눌러주세요</li>
+    </ol>
+  </div>
+
+  <div class="footer-note">이 페이지는 알림 구독 외의 개인정보를 저장하지 않습니다.</div>
+</div>
+
+<script>
+  // ── URL 파라미터로 교회별 설정 읽기 ──────────────────────────────
+  // 사용 예: index.html?app=<OneSignal App ID>&church=은혜교회&logo=https://.../logo.png
+  const params = new URLSearchParams(location.search);
+  const appId = params.get('app');
+  const churchName = params.get('church');
+  const logoUrl = params.get('logo');
+
+  if (churchName) {
+    document.getElementById('churchName').textContent = churchName;
+    document.title = churchName + ' 공지 알림';
+  }
+  if (logoUrl) {
+    const logoEl = document.getElementById('logo');
+    logoEl.textContent = '';
+    const img = document.createElement('img');
+    img.src = logoUrl;
+    img.alt = churchName || '교회 로고';
+    logoEl.appendChild(img);
+  }
+
+  const statusEl = document.getElementById('status');
+  const btn = document.getElementById('subscribeBtn');
+  const iosStepsEl = document.getElementById('iosSteps');
+
+  function showStatus(kind, html) {
+    statusEl.className = 'status show status-' + kind;
+    statusEl.innerHTML = html;
+  }
+
+  // ── iOS는 홈 화면에 추가된 상태(Standalone)에서만 알림 권한 요청 가능 ──
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+
+  if (!appId) {
+    btn.disabled = true;
+    showStatus('error', '이 링크에 교회 정보가 없어요. 목사님/관리자에게 정확한 링크를 다시 요청해주세요.');
+  } else if (isIOS && !isStandalone) {
+    btn.disabled = true;
+    btn.textContent = '먼저 홈 화면에 추가해주세요';
+    iosStepsEl.classList.add('show');
+  } else if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+    btn.disabled = true;
+    showStatus('error', '이 브라우저는 알림 기능을 지원하지 않아요. 안드로이드는 Chrome, 아이폰은 Safari 사용을 권장합니다.');
+  } else {
+    initOneSignal();
+  }
+
+  // ── OneSignal 초기화 ──────────────────────────────────────────
+  function initOneSignal() {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+      await OneSignal.init({
+        appId: appId,
+        serviceWorkerParam: { scope: './' },
+        serviceWorkerPath: 'OneSignalSDKWorker.js',
+      });
+      refreshUI(OneSignal);
+      OneSignal.User.PushSubscription.addEventListener('change', () => refreshUI(OneSignal));
+    });
+  }
+
+  function refreshUI(OneSignal) {
+    const optedIn = OneSignal.User.PushSubscription.optedIn;
+    if (optedIn) {
+      btn.disabled = true;
+      btn.textContent = '알림 받는 중 ✓';
+      showStatus('ok', '알림이 켜졌습니다. 이제 공지사항을 이 기기로 바로 받아보실 수 있어요.');
+    } else {
+      btn.disabled = false;
+      btn.textContent = '알림 받기';
+    }
+  }
+
+  btn.addEventListener('click', async () => {
+    if (!window.OneSignal) return;
+    btn.disabled = true;
+    btn.textContent = '권한 요청 중…';
+    try {
+      await OneSignal.Notifications.requestPermission();
+      const granted = OneSignal.Notifications.permission;
+      if (!granted) {
+        btn.disabled = false;
+        btn.textContent = '알림 받기';
+        showStatus('error', '알림 권한이 거부되었어요. 휴대폰 설정 &gt; 알림에서 이 페이지(브라우저)의 알림을 허용한 뒤 다시 시도해주세요.');
+      }
+      // 허용된 경우 UI는 change 이벤트(refreshUI)에서 갱신됨
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '알림 받기';
+      showStatus('error', '오류가 발생했어요: ' + (err && err.message ? err.message : err));
+    }
+  });
+</script>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+</body>
+</html>
