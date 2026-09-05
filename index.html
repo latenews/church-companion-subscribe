@@ -231,13 +231,22 @@
   }
 
   // ── Initialize OneSignal ──────────────────────────────────────
+  // IMPORTANT: this page is hosted at a sub-path (e.g. GitHub Pages project
+  // site "username.github.io/repo-name/"), not at the domain root. OneSignal's
+  // SDK defaults to registering the service worker at the domain root unless
+  // given an ABSOLUTE path here — a relative "./" scope was observed to still
+  // resolve to the domain root and fail with a 404 (confirmed via live
+  // debugging on 2026-09-05). Compute the current directory as an absolute
+  // path so this works regardless of which sub-path a given deployment lives at.
+  const baseDir = location.pathname.replace(/[^/]*$/, ''); // e.g. "/church-companion-subscribe/"
+
   function initOneSignal() {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function (OneSignal) {
       await OneSignal.init({
         appId: appId,
-        serviceWorkerParam: { scope: './' },
-        serviceWorkerPath: 'OneSignalSDKWorker.js',
+        serviceWorkerParam: { scope: baseDir },
+        serviceWorkerPath: baseDir + 'OneSignalSDKWorker.js',
       });
       refreshUI(OneSignal);
       OneSignal.User.PushSubscription.addEventListener('change', () => refreshUI(OneSignal));
