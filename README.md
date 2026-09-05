@@ -2,26 +2,32 @@
 
 [[15. 푸시 알림(WhatsApp 대안) 설계 - OneSignal 연동 (2026-09-05)]]의 "컴포넌트 A"에 해당하는 실제 코드. 교인이 이 페이지를 열고 "알림 받기"만 누르면 앱 설치 없이 웹 푸시 구독이 완료된다.
 
+## 2026-09-05: 실기기 검증 완료, 배포처 변경됨
+
+**실제 배포 주소(운영 중)**: `https://church-companion-subscribe.pages.dev/` — **GitHub Pages가 아니라 Cloudflare Pages**로 서빙 중. 이유: GitHub Pages 프로젝트 사이트처럼 도메인의 서브패스(`username.github.io/repo/`)에서 호스팅하면 OneSignal 웹푸시의 서비스워커 등록이 항상 도메인 루트를 시도하다 404로 실패하는 근본적 비호환 문제가 실측으로 확인됨(자세한 원인은 [[15. 푸시 알림(WhatsApp 대안) 설계 - OneSignal 연동 (2026-09-05)]]의 트러블슈팅 6번 참고). GitHub 저장소(`latenews/church-companion-subscribe`)는 소스 보관용으로 계속 쓰되, 실제 서빙은 Cloudflare Pages 기준으로 한다.
+
+안드로이드 실기기(Chrome)로 구독 → 발송 → 알림 수신·클릭까지 전체 확인 완료.
+
 ## 파일 구성
 
-- `index.html` — 유일한 화면. 교회명/로고/버튼 하나.
+- `index.html` — 유일한 화면. 교회명/로고/버튼 하나. (영어로 작성됨 — 남아공 사용 대상이라 한국어 아님)
 - `manifest.json` — PWA 설치(홈 화면 추가) 메타데이터.
-- `OneSignalSDKWorker.js` — OneSignal이 요구하는 서비스워커 파사드 파일(그대로 두면 됨, 수정 불필요).
-- `icon-192.png`, `icon-512.png` — **아직 없음, 배포 전 추가 필요** (아래 "남은 작업" 참고).
+- `OneSignalSDKWorker.js` — 파일명은 관례상 이렇게 두지만, **내용은 `importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js")`여야 함**(v16 기준 CDN 파일명이 `OneSignalSDKWorker.js`가 아니라 `OneSignalSDK.sw.js`로 바뀌었음 — 처음에 이 착오로 한 차례 404를 겪었으니 다른 프로젝트에 복사할 때 주의).
+- `icon-192.png`, `icon-512.png` — 마스터 아이콘(`X:\작업\개발\교인 관리 앱\아이콘\마스터_아이콘_1024.png`)에서 리사이즈해 적용 완료.
 
-## 아직 안 한 것 — 배포 전 필요
+## 새 교회 온보딩 시 해야 할 일 (체크리스트)
 
-1. **아이콘 2개 추가**: `icon-192.png`(192×192), `icon-512.png`(512×512). 종 모양이나 교회 로고 기반으로 제작해 이 폴더에 넣고 `manifest.json`/`index.html`의 `apple-touch-icon` 경로와 맞추면 됨. 지금은 파일이 없어 홈 화면 추가 시 아이콘이 깨져 보일 수 있음(기능 자체는 아이콘 없이도 동작함).
-2. **GitHub Pages 배포**: 이 `subscribe/` 폴더를 별도 저장소(예: `church-companion-subscribe`)로 만들거나, 기존 `church-companion` 저장소에 `docs/` 폴더로 넣고 GitHub Pages를 활성화. 빌드서버(git 사용 가능)에서 처리 필요 — 이 Windows PC는 git이 없음([[no-git-node-on-this-pc]]).
-3. **Cloudflare Worker 릴레이 제작**: 아직 없음 — 다음 단계 작업.
-4. **church-companion 앱에 Settings 필드 + 발송 화면 추가**: 아직 없음 — 그 다음 단계.
+1. 그 교회가 OneSignal 무료 계정을 만들고 **Web Push** 앱 생성 (Site URL은 반드시 `https://church-companion-subscribe.pages.dev` 그대로 — 이 정적 페이지는 여러 교회가 URL 파라미터로 공유하는 구조라 교회마다 새로 만들 필요 없음. **단, OneSignal 앱 자체는 교회마다 별도로 만들어야 함**)
+2. Keys & IDs에서 App ID, REST API Key 확인 — REST API Key 발급 화면에서 **"IP Allowlist" 체크박스가 꺼져 있는지 반드시 확인**(기본값이 켜짐+빈 목록이라 모든 요청이 차단되는 함정이 있었음)
+3. [[relay]] 폴더 README를 따라 그 교회 전용 Cloudflare Worker 배포 + 시크릿 3종 설정
+4. 이 페이지 링크(`?app=<그 교회 App ID>&church=<교회명>`)를 교인들에게 공유
 
 ## 교회별 링크 만드는 법
 
-배포 후 URL에 파라미터만 바꿔서 교회마다 같은 페이지를 재사용한다:
+URL에 파라미터만 바꿔서 교회마다 같은 페이지를 재사용한다:
 
 ```
-https://<배포주소>/subscribe/?app=<OneSignal App ID>&church=은혜교회&logo=https://.../logo.png
+https://church-companion-subscribe.pages.dev/?app=<OneSignal App ID>&church=Grace Church&logo=https://.../logo.png
 ```
 
 - `app` (필수): 그 교회가 OneSignal에서 무료로 발급받은 App ID
