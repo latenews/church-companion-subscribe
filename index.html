@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>교회 공지 알림</title>
+<title>Church Notifications</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -159,28 +159,28 @@
 
 <div class="card">
   <div class="logo" id="logo">🔔</div>
-  <h1>알림 받기<br><span class="church-name" id="churchName">우리 교회</span></h1>
-  <p class="lead" id="leadText">주보와 공지사항을 앱 설치 없이, 데이터 요금 걱정 없이 바로 휴대폰 알림으로 받아보세요.</p>
+  <h1>Get Notifications<br><span class="church-name" id="churchName">Our Church</span></h1>
+  <p class="lead" id="leadText">Get church announcements and bulletins sent straight to your phone — no app install, no data costs.</p>
 
-  <button class="btn btn-primary" id="subscribeBtn">알림 받기</button>
+  <button class="btn btn-primary" id="subscribeBtn">Enable Notifications</button>
 
   <div class="status" id="status"></div>
   <div class="steps" id="iosSteps">
-    <b>아이폰에서는 먼저 홈 화면에 추가해야 알림을 받을 수 있어요:</b>
+    <b>On iPhone, you must add this page to your Home Screen first:</b>
     <ol>
-      <li>아래쪽 <b>공유 버튼</b>(⬆️ 네모 아이콘)을 누르세요</li>
-      <li><b>"홈 화면에 추가"</b>를 선택하세요</li>
-      <li>홈 화면에 생긴 아이콘을 눌러 <b>다시 열어주세요</b></li>
-      <li>그 다음 "알림 받기" 버튼을 눌러주세요</li>
+      <li>Tap the <b>Share button</b> (⬆️ square icon) at the bottom</li>
+      <li>Choose <b>"Add to Home Screen"</b></li>
+      <li>Open the app from the <b>new icon on your Home Screen</b></li>
+      <li>Then tap "Enable Notifications" again</li>
     </ol>
   </div>
 
-  <div class="footer-note">이 페이지는 알림 구독 외의 개인정보를 저장하지 않습니다.</div>
+  <div class="footer-note">This page does not store any personal information beyond your notification subscription.</div>
 </div>
 
 <script>
-  // ── URL 파라미터로 교회별 설정 읽기 ──────────────────────────────
-  // 사용 예: index.html?app=<OneSignal App ID>&church=은혜교회&logo=https://.../logo.png
+  // ── Read per-church settings from the URL ──────────────────────
+  // Example: index.html?app=<OneSignal App ID>&church=Grace Church&logo=https://.../logo.png
   const params = new URLSearchParams(location.search);
   const appId = params.get('app');
   const churchName = params.get('church');
@@ -188,14 +188,14 @@
 
   if (churchName) {
     document.getElementById('churchName').textContent = churchName;
-    document.title = churchName + ' 공지 알림';
+    document.title = churchName + ' Notifications';
   }
   if (logoUrl) {
     const logoEl = document.getElementById('logo');
     logoEl.textContent = '';
     const img = document.createElement('img');
     img.src = logoUrl;
-    img.alt = churchName || '교회 로고';
+    img.alt = churchName || 'Church logo';
     logoEl.appendChild(img);
   }
 
@@ -207,27 +207,30 @@
     statusEl.className = 'status show status-' + kind;
     statusEl.innerHTML = html;
   }
+  function hideStatus() {
+    statusEl.className = 'status';
+  }
 
-  // ── iOS는 홈 화면에 추가된 상태(Standalone)에서만 알림 권한 요청 가능 ──
+  // ── iOS only allows the permission prompt once installed to Home Screen ──
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isStandalone = window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches;
 
   if (!appId) {
     btn.disabled = true;
-    showStatus('error', '이 링크에 교회 정보가 없어요. 목사님/관리자에게 정확한 링크를 다시 요청해주세요.');
+    showStatus('error', 'This link is missing church information. Please ask your pastor/admin for the correct link.');
   } else if (isIOS && !isStandalone) {
     btn.disabled = true;
-    btn.textContent = '먼저 홈 화면에 추가해주세요';
+    btn.textContent = 'Please add to Home Screen first';
     iosStepsEl.classList.add('show');
   } else if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     btn.disabled = true;
-    showStatus('error', '이 브라우저는 알림 기능을 지원하지 않아요. 안드로이드는 Chrome, 아이폰은 Safari 사용을 권장합니다.');
+    showStatus('error', 'This browser does not support notifications. Please use Chrome on Android or Safari on iPhone.');
   } else {
     initOneSignal();
   }
 
-  // ── OneSignal 초기화 ──────────────────────────────────────────
+  // ── Initialize OneSignal ──────────────────────────────────────
   function initOneSignal() {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function (OneSignal) {
@@ -245,31 +248,61 @@
     const optedIn = OneSignal.User.PushSubscription.optedIn;
     if (optedIn) {
       btn.disabled = true;
-      btn.textContent = '알림 받는 중 ✓';
-      showStatus('ok', '알림이 켜졌습니다. 이제 공지사항을 이 기기로 바로 받아보실 수 있어요.');
+      btn.textContent = 'Notifications On ✓';
+      showStatus('ok', "You're all set. Announcements will now be sent straight to this device.");
     } else {
       btn.disabled = false;
-      btn.textContent = '알림 받기';
+      btn.textContent = 'Enable Notifications';
     }
+  }
+
+  // Small helper: race a promise against a timeout so the button never
+  // gets stuck forever if the browser's permission UI is easy to miss
+  // (e.g. a quiet address-bar icon instead of a blocking popup).
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+    ]);
   }
 
   btn.addEventListener('click', async () => {
     if (!window.OneSignal) return;
     btn.disabled = true;
-    btn.textContent = '권한 요청 중…';
+    btn.textContent = 'Requesting permission…';
+    showStatus(
+      'info',
+      'A browser permission prompt should appear now. On desktop Chrome it can show as a small ' +
+      '<b>bell/lock icon in the address bar</b> instead of a popup — click it and choose <b>Allow</b>. ' +
+      'On mobile it is usually a full-width popup.'
+    );
+
     try {
-      await OneSignal.Notifications.requestPermission();
+      await withTimeout(OneSignal.Notifications.requestPermission(), 20000);
+      hideStatus();
       const granted = OneSignal.Notifications.permission;
       if (!granted) {
         btn.disabled = false;
-        btn.textContent = '알림 받기';
-        showStatus('error', '알림 권한이 거부되었어요. 휴대폰 설정 &gt; 알림에서 이 페이지(브라우저)의 알림을 허용한 뒤 다시 시도해주세요.');
+        btn.textContent = 'Enable Notifications';
+        showStatus(
+          'error',
+          'Notification permission was not granted. Please check your browser/phone notification settings for this site and allow notifications, then try again.'
+        );
       }
-      // 허용된 경우 UI는 change 이벤트(refreshUI)에서 갱신됨
+      // If granted, the UI updates via the change event (refreshUI).
     } catch (err) {
       btn.disabled = false;
-      btn.textContent = '알림 받기';
-      showStatus('error', '오류가 발생했어요: ' + (err && err.message ? err.message : err));
+      btn.textContent = 'Enable Notifications';
+      if (err && err.message === 'timeout') {
+        showStatus(
+          'error',
+          'Still waiting for a response after 20 seconds. Look for a small notification icon in your address bar ' +
+          '(often on the left or right side, sometimes shown as "🔔" or a lock icon) and click <b>Allow</b> there. ' +
+          'If you don\'t see anything, check your browser\'s site settings and make sure notifications aren\'t already set to "Block" for this page.'
+        );
+      } else {
+        showStatus('error', 'Something went wrong: ' + (err && err.message ? err.message : err));
+      }
     }
   });
 </script>
